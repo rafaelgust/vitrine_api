@@ -1,0 +1,8 @@
+[package]
+name = "vitrine_api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.14", features = ["full"] }
+warp = "0.3.6"
