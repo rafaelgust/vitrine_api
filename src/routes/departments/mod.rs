@@ -8,7 +8,6 @@ pub fn route() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejectio
         .map(|| "Departments endpoint")
 }
 
-
 use route as departments_route;
 use sub_department::route as sub_departments_route;
 
