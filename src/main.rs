@@ -7,13 +7,17 @@ async fn main() {
     
     //let routes = routes::products_route().or(routes::routes()); // This is the original code
 
-    let products = warp::path("products")
+    let products = warp::path!("api" / "products")
     .and(warp::get())
     .map(|| "Products endpoint");
 
-    let department = warp::path("departments").and(warp::get()).map(|| "Departments endpoint");
+    let department = warp::path!("api" / "department" / i32 / "subdepartment" / i32)
+    .map(|department_id: i32, subdepartment_id: i32| {
+        format!("Department ID: {},
+         Subdepartment ID: {}", department_id, subdepartment_id)
+    });
 
-    let sub_departments = warp::path("sub_departments").and(warp::get()).map(|| "SubDepartments endpoint");
+    let sub_departments = warp::path!("api" / "departments" / "sub-departments").and(warp::get()).map(|| "SubDepartments endpoint");
 
     let routes = products.or(department).or(sub_departments);
 
