@@ -1,10 +1,16 @@
-use rocket::http::uri::Origin;
-use rocket::response::Redirect;
-
-const URI_PRODUCT : Origin<'static> = uri!("/product");
+#![allow(unused_imports)]
 
 #[macro_use] 
 extern crate rocket;
+
+
+use rocket::serde::json::Json;
+use rocket::http::uri::Origin;
+use rocket::response::Redirect;
+
+
+const URI_PRODUCT : Origin<'static> = uri!("/product");
+
 
 #[get("/")]
 fn index() -> Redirect {
@@ -22,7 +28,7 @@ fn department(name: &str) -> String {
 }
 
 #[launch]
-fn rocket() -> _ {
+pub fn rocket() -> _ {
     rocket::build()
     .mount("/", routes![index])
     .mount(URI_PRODUCT, routes![product])
