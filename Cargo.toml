@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+dotenv = "0.15.0"
 rocket = {version = "0.5.0", features = ["json"]}
 diesel = {version = "2.1.4", features = ["postgres"]}

@@ -1,36 +1,24 @@
-#![allow(unused_imports)]
-
-#[macro_use] 
+#[macro_use]
 extern crate rocket;
+extern crate diesel;
 
+mod db;
+mod router;
+mod models;
+mod schema;
 
-use rocket::serde::json::Json;
-use rocket::http::uri::Origin;
-use rocket::response::Redirect;
+use rocket::Rocket;
+use rocket::Build;
 
-
-const URI_PRODUCT : Origin<'static> = uri!("/product");
-
-
-#[get("/")]
-fn index() -> Redirect {
-    Redirect::to(URI_PRODUCT)
-}
-
-#[get("/<name>")]
-fn product(name: &str) -> String {
-    format!("Product {}", name)
-}
-
-#[get("/<name>")]
-fn department(name: &str) -> String {
-    format!("Department {}", name)
-}
-
-#[launch]
-pub fn rocket() -> _ {
+fn rocket() -> Rocket<Build> {
     rocket::build()
-    .mount("/", routes![index])
-    .mount(URI_PRODUCT, routes![product])
-    .mount("/department", routes![department])
+    .mount("/", routes![router::get_index])
+    .mount(router::URI_PRODUCT, routes![router::get_products])
+    .mount(router::URI_PRODUCT, routes![router::get_product])
+    .mount("/department", routes![router::get_department])
+}
+
+#[rocket::main]
+async fn main() {
+    rocket().launch().await.expect("Failed to launch Rocket");
 }
