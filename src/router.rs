@@ -5,9 +5,14 @@ use diesel::RunQueryDsl;
 use crate::db::establish_connection;
 use crate::models::Product;
 
-pub const URI_PRODUCT : Origin<'static> = uri!("/product");
+pub const URI_PRODUCT : Origin<'static> = uri!("/products");
 
 #[get("/")]
+pub fn get_index() -> Redirect {
+    Redirect::to(URI_PRODUCT)
+}
+
+#[get("/all")]
 pub fn get_products() {
     use crate::schema::products::dsl::*;
 
@@ -22,12 +27,7 @@ pub fn get_products() {
     }
 }
 
-#[get("/")]
-pub fn get_index() -> Redirect {
-    Redirect::to(URI_PRODUCT)
-}
-
-#[get("/<name>")]
+#[get("/product/<name>")]
 pub fn get_product(name: &str) -> String {
     format!("Product {}", name)
 }
