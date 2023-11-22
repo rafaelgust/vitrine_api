@@ -13,9 +13,9 @@ use rocket::Build;
 fn rocket() -> Rocket<Build> {
     rocket::build()
     .mount("/", routes![router::get_index])
-    .mount(router::URI_PRODUCT, routes![router::get_products])
-    .mount(router::URI_PRODUCT, routes![router::get_product])
-    .mount("/department", routes![router::get_department])
+    .mount(router::URI_PRODUCT, routes![router::get_products, router::get_product])
+    .mount(router::URI_DEPARTMENT, routes![router::get_products, router::get_department])
+    .mount(router::URI_BRAND, routes![router::get_brand, router::new_brand])
 }
 
 #[rocket::main]
