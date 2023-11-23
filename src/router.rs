@@ -32,7 +32,7 @@ pub fn new_brand(new_brand: Json<NewBrand<'_>>) -> Result<Accepted<String>, NotF
 }
 
 #[put("/", data = "<brand>")]
-pub fn update_brand(brand: Json<UpdateBrand>) -> Result<Json<Brand>, NotFound<String>> {
+pub fn update_brand(brand: Json<UpdateBrand>) -> Result<Accepted<Json<Brand>>, NotFound<String>> {
     use crate::schema::brands::dsl::*;
 
     let connection = &mut establish_connection();
@@ -46,7 +46,7 @@ pub fn update_brand(brand: Json<UpdateBrand>) -> Result<Json<Brand>, NotFound<St
     .optional();
 
     match result {
-        Ok(Some(brand)) => Ok(Json(brand)),
+        Ok(Some(brand)) => Ok(Accepted(Json(brand))),
         Ok(None) => Err(NotFound(format!("Unable to find brand"))),
         Err(_) => Err(NotFound(format!("An error occurred while fetching brand"))),
     }
@@ -117,5 +117,26 @@ pub fn get_product(name: Option<String>) -> String {
     match name {
         Some(name) => format!("Product {}", name),
         None => "Product not found".into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rocket::http::Status;
+    use rocket::local::blocking::Client;
+    use rocket::http::ContentType;
+
+    #[test]
+    fn test_new_brand() {
+        let rocket = rocket::build().mount("/", routes![new_brand]);
+        let client = Client::tracked(rocket).unwrap();
+        let new_brand = r#"{ "name": "Test Brand" }"#;
+        let response = client.post("/")
+                             .header(ContentType::JSON)
+                             .body(new_brand)
+                             .dispatch();
+
+        assert_eq!(response.status(), Status::Accepted);
     }
 }
