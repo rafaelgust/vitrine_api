@@ -9,11 +9,10 @@ pub struct Brand {
     pub name: String,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize, Serialize)]
 #[diesel(table_name = crate::schema::brands)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct NewBrand {
-    pub name: String,
+pub struct NewBrand <'a> {
+    name: &'a str,
 }
 
 #[derive(Queryable, Selectable, Insertable, Deserialize, Serialize)]

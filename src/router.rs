@@ -1,5 +1,5 @@
 use rocket::http::uri::Origin;
-use rocket::response::{Redirect, status::Created, status::NotFound};
+use rocket::response::{Redirect, status::Accepted, status::NotFound};
 use rocket::serde::json::Json;
 use diesel::prelude::*;
 
@@ -13,24 +13,41 @@ pub fn get_index() -> Redirect {
 
 pub const URI_BRAND : Origin<'static> = uri!("/brand");
 
-#[post("/", data = "<brand>")]
-pub fn new_brand(brand: String) -> Result<String, NotFound<String>> {
-   /*  use crate::schema::brands::dsl::*;
+#[post("/", data = "<new_brand>")]
+pub fn new_brand(new_brand: Json<NewBrand<'_>>) -> Result<Accepted<String>, NotFound<String>> {
+    use crate::schema::brands::dsl::*;
 
     let connection = &mut establish_connection();
 
-    let new_brand = NewBrand{ name: brand };
-
-    diesel::insert_into(brands)
-    .values(new_brand)
-    .execute(connection)
-    .optional();
+    let result = 
+        diesel::insert_into(brands)
+        .values(new_brand.into_inner())
+        .execute(connection)
+        .optional();
     
-    match brand {
-        Ok(_) => Ok(format!("Unable to find brand")),
+    match result {
+        Ok(Some(_)) => Ok(Accepted(format!("Brand was created"))),
+        Ok(None) => Err(NotFound(format!("Unable to find brand"))),
         Err(_) => Err(NotFound(format!("An error occurred while fetching brand"))),
-    } */
-    Ok(format!("Unable to find brand"))
+    }
+}
+
+#[get("/")]
+pub fn get_all_brands() -> Result<Json<Vec<Brand>>, NotFound<String>> {
+    use crate::schema::brands::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    let result = brands
+        .limit(10)
+        .load::<Brand>(connection)
+        .optional();
+
+    match result {
+        Ok(Some(brand)) => Ok(Json(brand)),
+        Ok(None) => Err(NotFound(format!("Unable to find brand"))),
+        Err(_) => Err(NotFound(format!("An error occurred while fetching brand"))),
+    }
 }
 
 #[get("/<brandname>")]
