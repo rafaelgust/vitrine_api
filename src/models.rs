@@ -11,6 +11,14 @@ pub struct Brand {
 
 #[derive(Insertable, Deserialize, Serialize)]
 #[diesel(table_name = crate::schema::brands)]
+pub struct UpdateBrand {
+    pub id: i32,
+    pub name: String,
+}
+
+
+#[derive(Insertable, Deserialize, Serialize)]
+#[diesel(table_name = crate::schema::brands)]
 pub struct NewBrand <'a> {
     name: &'a str,
 }

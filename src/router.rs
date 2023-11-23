@@ -19,14 +19,34 @@ pub fn new_brand(new_brand: Json<NewBrand<'_>>) -> Result<Accepted<String>, NotF
 
     let connection = &mut establish_connection();
 
-    let result = 
-        diesel::insert_into(brands)
-        .values(new_brand.into_inner())
-        .execute(connection)
-        .optional();
+    let result = diesel::insert_into(brands)
+                    .values(new_brand.into_inner())
+                    .execute(connection)
+                    .optional();
     
     match result {
         Ok(Some(_)) => Ok(Accepted(format!("Brand was created"))),
+        Ok(None) => Err(NotFound(format!("Unable to find brand"))),
+        Err(_) => Err(NotFound(format!("An error occurred while fetching brand"))),
+    }
+}
+
+#[put("/", data = "<brand>")]
+pub fn update_brand(brand: Json<UpdateBrand>) -> Result<Json<Brand>, NotFound<String>> {
+    use crate::schema::brands::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    let brand = brand.into_inner();
+
+    let result = diesel::update(brands.find(brand.id))
+    .set(name.eq(brand.name))
+    .returning(Brand::as_returning())
+    .get_result(connection)
+    .optional();
+
+    match result {
+        Ok(Some(brand)) => Ok(Json(brand)),
         Ok(None) => Err(NotFound(format!("Unable to find brand"))),
         Err(_) => Err(NotFound(format!("An error occurred while fetching brand"))),
     }
