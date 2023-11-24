@@ -48,9 +48,8 @@ pub fn update_brand(brand: Json<UpdateBrand>) -> Result<Accepted<Json<Brand>>, N
 
     match result {
         Ok(BrandResult::Brand(Some(brand))) => Ok(Accepted(Json(brand))),
-        Ok(BrandResult::Brand(None)) => Err(NotFound(format!("Brand not found"))),
         Ok(_) => Err(NotFound(format!("Unexpected result"))),
-        Err(_) => Err(NotFound(format!("An error occurred while fetching brand"))),
+        Err(err) => Err(NotFound(err.to_string())),
     }
 }
 

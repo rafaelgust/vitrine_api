@@ -27,7 +27,7 @@ pub fn handle_brand_command(brand: BrandCommand) -> Result<BrandResult, Error> {
             create_brand(brand).map(BrandResult::Message)
         }
         BrandSubcommand::Update(brand) => {
-            update_brand(brand).map(BrandResult::Message)
+            update_brand(brand).map(BrandResult::Brand)
         }
         BrandSubcommand::Delete(delete_entity) => {
             delete_brand(delete_entity).map(BrandResult::Message)
@@ -77,7 +77,7 @@ fn create_brand(brand: CreateBrand) -> Result<String, Error> {
     }
 }
 
-fn update_brand(brand: UpdateBrand) -> Result<String, Error> {
+fn update_brand(brand: UpdateBrand) -> Result<Option<DBBrand>, Error> {
     println!("Updating brand: {:?}", brand);
     use crate::schema::brands::dsl::*;
 
@@ -88,9 +88,9 @@ fn update_brand(brand: UpdateBrand) -> Result<String, Error> {
                     .returning(DBBrand::as_returning())
                     .get_result(connection)
                     .optional();
-
+                
     match result {
-        Ok(_) => Ok(format!("Brand updated")),
+        Ok(brand) => Ok(brand),
         Err(err) => Err(err),
     }
 }
