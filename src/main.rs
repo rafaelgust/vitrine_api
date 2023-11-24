@@ -7,6 +7,9 @@ mod router;
 mod models;
 mod schema;
 
+mod ops;
+mod args;
+
 use rocket::Rocket;
 use rocket::Build;
 

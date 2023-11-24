@@ -20,7 +20,7 @@ pub struct UpdateBrand {
 #[derive(Insertable, Deserialize, Serialize)]
 #[diesel(table_name = crate::schema::brands)]
 pub struct NewBrand <'a> {
-    name: &'a str,
+    pub name: &'a str,
 }
 
 #[derive(Queryable, Selectable, Insertable, Deserialize, Serialize)]
