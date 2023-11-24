@@ -4,7 +4,7 @@ use rocket::serde::json::Json;
 
 use crate::models::*;
 
-use crate::args::{BrandCommand, BrandSubcommand};
+use crate::args::{BrandCommand, BrandSubcommand, DeleteEntity};
 use crate::args::{GetBrand, CreateBrand, UpdateBrand as UpdateBrandArgs};
 use crate::ops::brand_ops::{self, BrandResult};
 
@@ -16,7 +16,7 @@ pub fn get_index() -> Redirect {
 
 pub const URI_BRAND : Origin<'static> = uri!("/brand");
 
-#[post("/", data = "<new_brand>")]
+#[post("/", data = "<new_brand>", format = "application/json")]
 pub fn new_brand(new_brand: Json<NewBrand<'_>>) -> Result<Accepted<String>, NotFound<String>> {
 
     let brand = CreateBrand {
@@ -34,7 +34,7 @@ pub fn new_brand(new_brand: Json<NewBrand<'_>>) -> Result<Accepted<String>, NotF
     }
 }
 
-#[put("/", data = "<brand>")]
+#[put("/", data = "<brand>", format = "application/json")]
 pub fn update_brand(brand: Json<UpdateBrand>) -> Result<Accepted<Json<Brand>>, NotFound<String>> {
     
     let brand = UpdateBrandArgs {
@@ -53,7 +53,7 @@ pub fn update_brand(brand: Json<UpdateBrand>) -> Result<Accepted<Json<Brand>>, N
     }
 }
 
-#[get("/")]
+#[get("/", format = "application/json")]
 pub fn get_all_brands() -> Result<Json<Vec<Brand>>, NotFound<String>> {
     
     let result = brand_ops::handle_brand_command(BrandCommand {
@@ -67,13 +67,12 @@ pub fn get_all_brands() -> Result<Json<Vec<Brand>>, NotFound<String>> {
     }
 }
 
-#[get("/<brandname>")]
-pub fn get_brand(brandname: String) ->  Result<Json<Brand>, NotFound<String>> {
-    
+#[get("/<brand_name>", format = "application/json")]
+pub fn get_brand(brand_name: String) ->  Result<Json<Brand>, NotFound<String>> {
     
     let result = brand_ops::handle_brand_command(BrandCommand {
         command: BrandSubcommand::Show(GetBrand {
-            name: brandname,
+            name: brand_name,
         }),
     });
 
@@ -81,6 +80,22 @@ pub fn get_brand(brandname: String) ->  Result<Json<Brand>, NotFound<String>> {
         Ok(BrandResult::Brand(Some(brand))) => Ok(Json(brand)),
         Ok(_) => Err(NotFound(format!("Unable to find brand"))),
         Err(_) => Err(NotFound(format!("An error occurred while fetching brand"))),
+    }
+}
+
+#[delete("/", data = "<brand>", format = "application/json")]
+pub fn delete_brand(brand: Json<RemoveBrand>) ->  Result<Accepted<String>, NotFound<String>> {
+
+    let result = brand_ops::handle_brand_command(BrandCommand {
+        command: BrandSubcommand::Delete(DeleteEntity {
+            id: brand.id,
+        }),
+    });
+
+    match result {
+        Ok(BrandResult::Message(msg)) => Ok(Accepted(msg)),
+        Ok(_) => Err(NotFound(format!("Unexpected"))),
+        Err(_) => Err(NotFound(format!("An error occurred while was deleting brand"))),
     }
 }
 
