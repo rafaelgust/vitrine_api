@@ -3,14 +3,16 @@ use rocket::response::{Redirect, status::Accepted, status::NotFound};
 use rocket::serde::json::Json;
 
 use crate::models::*;
-use crate::args::{BrandCommand, BrandSubcommand, DeleteEntity};
-use crate::args::{GetEntity, CreateWithNameEntity, UpdateBrand as UpdateBrandArgs};
 use crate::ops::brand_ops::{self, BrandResult};
+use crate::ops::department_ops::{self, DepartmentResult};
+
+use crate::args::{BrandCommand, BrandSubcommand, DepartmentCommand, DepartmentSubcommand};
+use crate::args::{GetEntity, CreateWithNameEntity, DeleteEntity, UpdateBrand as UpdateBrandArgs, UpdateDepartment as UpdateDepartmentArgs};
 
 const BRAND_NOT_FOUND: &str = "Unable to find brand";
+const DEPARTMENT_NOT_FOUND: &str = "Unable to find department";
 const FETCH_ERROR: &str = "An error occurred while fetching data";
 const UNEXPECTED_RESULT: &str = "Unexpected result";
-
 
 #[get("/")]
 pub fn get_index() -> Redirect {
@@ -104,11 +106,86 @@ pub fn delete_brand(brand: Json<RemoveBrand>) ->  Result<Accepted<String>, NotFo
 
 pub const URI_DEPARTMENT : Origin<'static> = uri!("/department");
 
-#[get("/<name>")]
-pub fn get_department(name: Option<String>) -> String {
-    match name {
-        Some(name) => format!("Department {}", name),
-        None => "Department not found".into()
+#[post("/", data = "<new_department>", format = "application/json")]
+pub fn new_department(new_department: Json<NewDepartment<'_>>) -> Result<Accepted<String>, NotFound<String>> {
+
+    let department = CreateWithNameEntity {
+        name: new_department.name.to_string(),
+    };
+    
+    let result = department_ops::handle_department_command(DepartmentCommand {
+        command: DepartmentSubcommand::Create(department),
+    });
+    
+    match result {
+        Ok(DepartmentResult::Message(_)) => Ok(Accepted(format!("Department was created"))),
+        Ok(_) => Err(NotFound(format!("Unable to find department"))),
+        Err(_) => Err(NotFound(format!("An error occurred while fetching department"))),
+    }
+}
+
+#[put("/", data = "<department>", format = "application/json")]
+pub fn update_department(department: Json<UpdateDepartment>) -> Result<Accepted<Json<Department>>, NotFound<String>> {
+    
+    let department = UpdateDepartmentArgs {
+        id: department.id,
+        name: department.name.to_string(),
+    };
+    
+    let result = department_ops::handle_department_command(DepartmentCommand {
+        command: DepartmentSubcommand::Update(department),
+    });
+
+    match result {
+        Ok(DepartmentResult::Department(Some(department))) => Ok(Accepted(Json(department))),
+        Ok(_) => Err(NotFound(UNEXPECTED_RESULT.to_string())),
+        Err(err) => Err(NotFound(err.to_string())),
+    }
+}
+
+#[get("/", format = "application/json")]
+pub fn get_all_departments() -> Result<Json<Vec<Department>>, NotFound<String>> {
+    
+    let result = department_ops::handle_department_command(DepartmentCommand {
+        command: DepartmentSubcommand::ShowAll,
+    });
+
+    match result {
+        Ok(DepartmentResult::Departments(department)) => Ok(Json(department)),
+        Ok(_) => Err(NotFound(DEPARTMENT_NOT_FOUND.to_string())),
+        Err(_) => Err(NotFound(FETCH_ERROR.to_string())),
+    }
+}
+
+#[get("/<department_name>", format = "application/json")]
+pub fn get_department(department_name: String) ->  Result<Json<Department>, NotFound<String>> {
+    
+    let result = department_ops::handle_department_command(DepartmentCommand {
+        command: DepartmentSubcommand::Show(GetEntity {
+            name: department_name,
+        }),
+    });
+
+    match result {
+        Ok(DepartmentResult::Department(Some(department))) => Ok(Json(department)),
+        Ok(_) => Err(NotFound(DEPARTMENT_NOT_FOUND.to_string())),
+        Err(_) => Err(NotFound(FETCH_ERROR.to_string())),
+    }
+}
+
+#[delete("/", data = "<department>", format = "application/json")]
+pub fn delete_department(department: Json<RemoveDepartment>) ->  Result<Accepted<String>, NotFound<String>> {
+
+    let result = department_ops::handle_department_command(DepartmentCommand {
+        command: DepartmentSubcommand::Delete(DeleteEntity {
+            id: department.id,
+        }),
+    });
+
+    match result {
+        Ok(DepartmentResult::Message(msg)) => Ok(Accepted(msg)),
+        Ok(_) => Err(NotFound(UNEXPECTED_RESULT.to_string())),
+        Err(err) => Err(NotFound(err.to_string())),
     }
 }
 

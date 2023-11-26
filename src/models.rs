@@ -36,6 +36,25 @@ pub struct Department {
     pub name: String,
 }
 
+#[derive(Insertable, Deserialize, Serialize)]
+#[diesel(table_name = crate::schema::departments)]
+pub struct NewDepartment <'a> {
+    pub name: &'a str,
+}
+
+#[derive(Insertable, Deserialize, Serialize)]
+#[diesel(table_name = crate::schema::departments)]
+pub struct UpdateDepartment {
+    pub id: i32,
+    pub name: String,
+}
+
+#[derive(Queryable, Selectable, Deserialize, Serialize)]
+#[diesel(table_name = crate::schema::departments)]
+pub struct RemoveDepartment {
+    pub id: i32,
+}
+
 #[derive(Queryable, Selectable, Insertable, Deserialize, Serialize)]
 #[diesel(table_name = crate::schema::sub_departments)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
