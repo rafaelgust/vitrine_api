@@ -89,13 +89,12 @@ fn update_brand(brand: UpdateBrand, connection: &mut PgConnection) -> Result<Opt
 fn delete_brand(brand: DeleteEntity, connection: &mut PgConnection) -> Result<String, Error> {
     info!("Deleting brand: {:?}", brand);
 
-    let result = diesel::delete(brands.find(brand.id))
-        .execute(connection)
-        .optional();
+    let num_deleted = diesel::delete(brands.find(brand.id))
+        .execute(connection)?;
 
-    match result {
-        Ok(_) => Ok("Brand deleted".to_string()),
-        Err(err) => Err(err),
+    match num_deleted {
+        0 => Err(Error::NotFound),
+        _ => Ok("Brand deleted".to_string()),
     }
 }
 
