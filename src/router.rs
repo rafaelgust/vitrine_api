@@ -25,7 +25,7 @@ pub const URI_BRAND : Origin<'static> = uri!("/brand");
 pub fn new_brand(new_brand: Json<NewBrand<'_>>) -> Result<Accepted<String>, NotFound<String>> {
 
     let brand = CreateWithNameEntity {
-        name: new_brand.name.to_string(),
+        name: new_brand.name.trim().to_string(),
     };
     
     let result = brand_ops::handle_brand_command(BrandCommand {
@@ -33,7 +33,7 @@ pub fn new_brand(new_brand: Json<NewBrand<'_>>) -> Result<Accepted<String>, NotF
     });
     
     match result {
-        Ok(BrandResult::Message(_)) => Ok(Accepted(format!("Brand was created"))),
+        Ok(BrandResult::Message(_)) => Ok(Accepted(format!("Brand '{}' was created", new_brand.name.trim().to_string()))),
         Ok(_) => Err(NotFound(format!("Unable to find brand"))),
         Err(_) => Err(NotFound(format!("An error occurred while fetching brand"))),
     }
@@ -110,7 +110,7 @@ pub const URI_DEPARTMENT : Origin<'static> = uri!("/department");
 pub fn new_department(new_department: Json<NewDepartment<'_>>) -> Result<Accepted<String>, NotFound<String>> {
 
     let department = CreateWithNameEntity {
-        name: new_department.name.to_string(),
+        name: new_department.name.trim().to_string(),
     };
     
     let result = department_ops::handle_department_command(DepartmentCommand {
@@ -118,7 +118,7 @@ pub fn new_department(new_department: Json<NewDepartment<'_>>) -> Result<Accepte
     });
     
     match result {
-        Ok(DepartmentResult::Message(_)) => Ok(Accepted(format!("Department was created"))),
+        Ok(DepartmentResult::Message(_)) => Ok(Accepted(format!("Department '{}' was created", new_department.name.trim().to_string()))),
         Ok(_) => Err(NotFound(format!("Unable to find department"))),
         Err(_) => Err(NotFound(format!("An error occurred while fetching department"))),
     }
@@ -195,6 +195,7 @@ pub const URI_PRODUCT : Origin<'static> = uri!("/products");
 pub fn get_products() -> Json<Vec<Product>> {
     Json(vec![Product {
         id: 1,
+        url_name: "product_1".into(),
         name: "Product 1".into(),
         price: Some(10.0),
         description: "Description".into(),

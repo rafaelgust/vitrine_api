@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct Brand {
     pub id: i32,
     pub name: String,
+    pub url_name: String,
 }
 
 #[derive(Insertable, Deserialize, Serialize)]
@@ -34,6 +35,8 @@ pub struct RemoveBrand {
 pub struct Department {
     pub id: i32,
     pub name: String,
+    pub url_name: String,
+    pub color: Option<String>,
 }
 
 #[derive(Insertable, Deserialize, Serialize)]
@@ -61,6 +64,7 @@ pub struct RemoveDepartment {
 pub struct SubDepartment {
     pub id: i32,
     pub name: String,
+    pub url_name: String,
     pub department_id: Option<i32>, 
 }
 
@@ -70,6 +74,7 @@ pub struct SubDepartment {
 pub struct Product {
     pub id: i32,
     pub name: String,
+    pub url_name: String,
     pub price: Option<f64>,
     pub description: String,
     pub images: Vec<Option<String>>,

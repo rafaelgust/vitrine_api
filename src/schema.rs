@@ -3,14 +3,22 @@
 diesel::table! {
     brands (id) {
         id -> Int4,
+        #[max_length = 255]
         name -> Varchar,
+        #[max_length = 255]
+        url_name -> Varchar,
     }
 }
 
 diesel::table! {
     departments (id) {
         id -> Int4,
+        #[max_length = 255]
         name -> Varchar,
+        #[max_length = 255]
+        url_name -> Varchar,
+        #[max_length = 20]
+        color -> Nullable<Varchar>,
     }
 }
 
@@ -24,7 +32,10 @@ diesel::table! {
 diesel::table! {
     products (id) {
         id -> Int4,
+        #[max_length = 255]
         name -> Varchar,
+        #[max_length = 255]
+        url_name -> Varchar,
         price -> Nullable<Float8>,
         description -> Varchar,
         images -> Array<Nullable<Text>>,
@@ -36,7 +47,10 @@ diesel::table! {
 diesel::table! {
     sub_departments (id) {
         id -> Int4,
+        #[max_length = 255]
         name -> Varchar,
+        #[max_length = 255]
+        url_name -> Varchar,
         department_id -> Nullable<Int4>,
     }
 }
