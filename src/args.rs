@@ -16,29 +16,26 @@ pub enum EntityType {
     /// Create, update, delete or show brands
     Brand(BrandCommand),
 
-   /*  /// Create, update, delete or show departments
+    /// Create, update, delete or show departments
     Department(DepartmentCommand),
-
-    /// Create, update, delete or show subdepartments
-    SubDepartment(SubDepartmentCommand),
-
-    /// Create, update, delete or show products
-    Product(ProductCommand), */
 }
 
 #[derive(Debug, Args)]
-pub struct BrandCommand {
+pub struct EntityCommand<T: Subcommand> {
     #[clap(subcommand)]
-    pub command: BrandSubcommand,
+    pub command: T,
 }
+
+pub type BrandCommand = EntityCommand<BrandSubcommand>;
+pub type DepartmentCommand = EntityCommand<DepartmentSubcommand>;
 
 #[derive(Debug, Subcommand)]
 pub enum BrandSubcommand {
     /// Show brand by name
-    Show(GetBrand),
+    Show(GetEntity),
 
     /// Create a new brand
-    Create(CreateBrand),
+    Create(CreateWithNameEntity),
 
     /// Update an existing brand
     Update(UpdateBrand),
@@ -50,15 +47,39 @@ pub enum BrandSubcommand {
     ShowAll,
 }
 
+#[derive(Debug, Subcommand)]
+pub enum DepartmentSubcommand {
+    /// Show department by name
+    Show(GetEntity),
+
+    /// Create a new department
+    Create(CreateWithNameEntity),
+
+    /// Update an existing department
+    Update(UpdateDepartment),
+
+    /// Delete a department
+    Delete(DeleteEntity),
+
+    /// Show all departments
+    ShowAll,
+}
+
 #[derive(Debug, Args)]
-pub struct GetBrand {
-    /// The name of the brand to find
+pub struct GetEntity {
+    /// The name of the entity to find
     pub name: String,
 }
 
 #[derive(Debug, Args)]
-pub struct CreateBrand {
-    /// The name of the brand
+pub struct DeleteEntity {
+    /// The id of the entity to delete
+    pub id: i32,
+}
+
+#[derive(Debug, Args)]
+pub struct CreateWithNameEntity {
+    /// The name of the entity
     pub name: String,
 }
 
@@ -72,7 +93,10 @@ pub struct UpdateBrand {
 }
 
 #[derive(Debug, Args)]
-pub struct DeleteEntity {
-    /// The id of the entity to delete
+pub struct UpdateDepartment {
+    /// The id of the department to update
     pub id: i32,
+
+    /// The name of the department
+    pub name: String,
 }

@@ -1,8 +1,8 @@
 use crate::args::{
     BrandSubcommand, 
     BrandCommand, 
-    GetBrand, 
-    CreateBrand, 
+    GetEntity, 
+    CreateWithNameEntity, 
     UpdateBrand, 
     DeleteEntity
 };
@@ -10,6 +10,8 @@ use crate::db::establish_connection;
 use crate::models::{NewBrand, Brand as DBBrand};
 use diesel::prelude::*;
 use diesel::result::Error;
+use crate::schema::brands::dsl::*;
+use log::info;
 
 pub enum BrandResult {
     Brand(Option<DBBrand>),
@@ -18,31 +20,29 @@ pub enum BrandResult {
 }
 
 pub fn handle_brand_command(brand: BrandCommand) -> Result<BrandResult, Error> {
+    let connection = &mut establish_connection();
     let command = brand.command;
     match command {
         BrandSubcommand::Show(brand) => {
-            show_brand_by_name(brand).map(BrandResult::Brand)
+            show_brand_by_name(brand, connection).map(BrandResult::Brand)
         }
         BrandSubcommand::Create(brand) => {
-            create_brand(brand).map(BrandResult::Message)
+            create_brand(brand, connection).map(BrandResult::Message)
         }
         BrandSubcommand::Update(brand) => {
-            update_brand(brand).map(BrandResult::Brand)
+            update_brand(brand, connection).map(BrandResult::Brand)
         }
         BrandSubcommand::Delete(delete_entity) => {
-            delete_brand(delete_entity).map(BrandResult::Message)
+            delete_brand(delete_entity, connection).map(BrandResult::Message)
         }
         BrandSubcommand::ShowAll => {
-            show_brands().map(BrandResult::Brands)
+            show_brands(connection).map(BrandResult::Brands)
         }
     }
 }
 
-fn show_brand_by_name(brand: GetBrand) -> Result<Option<DBBrand>, Error> {
-    println!("Showing brand: {:?}", brand);
-    use crate::schema::brands::dsl::*;
-
-    let connection = &mut establish_connection();
+fn show_brand_by_name(brand: GetEntity, connection: &mut PgConnection) -> Result<Option<DBBrand>, Error> {
+    info!("Showing brand: {:?}", brand);
     
     let brand_result = brands
         .filter(name.eq(brand.name))
@@ -50,17 +50,11 @@ fn show_brand_by_name(brand: GetBrand) -> Result<Option<DBBrand>, Error> {
         .first(connection)
         .optional();
 
-    match brand_result {
-        Ok(brand) => Ok(brand),
-        Err(err) => Err(err),
-    }
+    brand_result
 }
 
-fn create_brand(brand: CreateBrand) -> Result<String, Error> {
-    println!("Creating brand: {:?}", brand);
-    use crate::schema::brands::dsl::*;
-
-    let connection = &mut establish_connection();
+fn create_brand(brand: CreateWithNameEntity, connection: &mut PgConnection) -> Result<String, Error> {
+    info!("Creating brand: {:?}", brand);
 
     let new_brand = NewBrand {
         name: &brand.name
@@ -77,11 +71,8 @@ fn create_brand(brand: CreateBrand) -> Result<String, Error> {
     }
 }
 
-fn update_brand(brand: UpdateBrand) -> Result<Option<DBBrand>, Error> {
-    println!("Updating brand: {:?}", brand);
-    use crate::schema::brands::dsl::*;
-
-    let connection = &mut establish_connection();
+fn update_brand(brand: UpdateBrand, connection: &mut PgConnection) -> Result<Option<DBBrand>, Error> {
+    info!("Updating brand: {:?}", brand);
 
     let result = diesel::update(brands.find(brand.id))
                     .set(name.eq(brand.name))
@@ -95,11 +86,8 @@ fn update_brand(brand: UpdateBrand) -> Result<Option<DBBrand>, Error> {
     }
 }
 
-fn delete_brand(brand: DeleteEntity) -> Result<String, Error> {
-    println!("Deleting brand: {:?}", brand);
-    use crate::schema::brands::dsl::*;
-
-    let connection = &mut establish_connection();
+fn delete_brand(brand: DeleteEntity, connection: &mut PgConnection) -> Result<String, Error> {
+    info!("Deleting brand: {:?}", brand);
 
     let result = diesel::delete(brands.find(brand.id))
         .execute(connection)
@@ -111,11 +99,8 @@ fn delete_brand(brand: DeleteEntity) -> Result<String, Error> {
     }
 }
 
-fn show_brands() -> Result<Vec<DBBrand>, Error> {
-    println!("Displaying all brands");
-    use crate::schema::brands::dsl::*;
-
-    let connection = &mut establish_connection();
+fn show_brands(connection: &mut PgConnection) -> Result<Vec<DBBrand>, Error> {
+    info!("Displaying all brands");
 
     let result = brands
         .load::<DBBrand>(connection);

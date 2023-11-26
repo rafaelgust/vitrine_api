@@ -1524,6 +1524,7 @@ dependencies = [
  "clap",
  "diesel",
  "dotenv",
+ "log",
  "rocket",
  "serde",
 ]

@@ -3,10 +3,13 @@ use rocket::response::{Redirect, status::Accepted, status::NotFound};
 use rocket::serde::json::Json;
 
 use crate::models::*;
-
 use crate::args::{BrandCommand, BrandSubcommand, DeleteEntity};
-use crate::args::{GetBrand, CreateBrand, UpdateBrand as UpdateBrandArgs};
+use crate::args::{GetEntity, CreateWithNameEntity, UpdateBrand as UpdateBrandArgs};
 use crate::ops::brand_ops::{self, BrandResult};
+
+const BRAND_NOT_FOUND: &str = "Unable to find brand";
+const FETCH_ERROR: &str = "An error occurred while fetching data";
+const UNEXPECTED_RESULT: &str = "Unexpected result";
 
 
 #[get("/")]
@@ -19,7 +22,7 @@ pub const URI_BRAND : Origin<'static> = uri!("/brand");
 #[post("/", data = "<new_brand>", format = "application/json")]
 pub fn new_brand(new_brand: Json<NewBrand<'_>>) -> Result<Accepted<String>, NotFound<String>> {
 
-    let brand = CreateBrand {
+    let brand = CreateWithNameEntity {
         name: new_brand.name.to_string(),
     };
     
@@ -48,7 +51,7 @@ pub fn update_brand(brand: Json<UpdateBrand>) -> Result<Accepted<Json<Brand>>, N
 
     match result {
         Ok(BrandResult::Brand(Some(brand))) => Ok(Accepted(Json(brand))),
-        Ok(_) => Err(NotFound(format!("Unexpected result"))),
+        Ok(_) => Err(NotFound(UNEXPECTED_RESULT.to_string())),
         Err(err) => Err(NotFound(err.to_string())),
     }
 }
@@ -62,8 +65,8 @@ pub fn get_all_brands() -> Result<Json<Vec<Brand>>, NotFound<String>> {
 
     match result {
         Ok(BrandResult::Brands(brand)) => Ok(Json(brand)),
-        Ok(_) => Err(NotFound(format!("Unable to find brand"))),
-        Err(_) => Err(NotFound(format!("An error occurred while fetching brand"))),
+        Ok(_) => Err(NotFound(BRAND_NOT_FOUND.to_string())),
+        Err(_) => Err(NotFound(FETCH_ERROR.to_string())),
     }
 }
 
@@ -71,15 +74,15 @@ pub fn get_all_brands() -> Result<Json<Vec<Brand>>, NotFound<String>> {
 pub fn get_brand(brand_name: String) ->  Result<Json<Brand>, NotFound<String>> {
     
     let result = brand_ops::handle_brand_command(BrandCommand {
-        command: BrandSubcommand::Show(GetBrand {
+        command: BrandSubcommand::Show(GetEntity {
             name: brand_name,
         }),
     });
 
     match result {
         Ok(BrandResult::Brand(Some(brand))) => Ok(Json(brand)),
-        Ok(_) => Err(NotFound(format!("Unable to find brand"))),
-        Err(_) => Err(NotFound(format!("An error occurred while fetching brand"))),
+        Ok(_) => Err(NotFound(BRAND_NOT_FOUND.to_string())),
+        Err(_) => Err(NotFound(FETCH_ERROR.to_string())),
     }
 }
 
@@ -94,8 +97,8 @@ pub fn delete_brand(brand: Json<RemoveBrand>) ->  Result<Accepted<String>, NotFo
 
     match result {
         Ok(BrandResult::Message(msg)) => Ok(Accepted(msg)),
-        Ok(_) => Err(NotFound(format!("Unexpected"))),
-        Err(_) => Err(NotFound(format!("An error occurred while was deleting brand"))),
+        Ok(_) => Err(NotFound(UNEXPECTED_RESULT.to_string())),
+        Err(err) => Err(NotFound(err.to_string())),
     }
 }
 
