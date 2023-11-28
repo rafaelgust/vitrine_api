@@ -51,7 +51,7 @@ diesel::table! {
         name -> Varchar,
         #[max_length = 255]
         url_name -> Varchar,
-        department_id -> Nullable<Int4>,
+        department_id -> Int4,
     }
 }
 

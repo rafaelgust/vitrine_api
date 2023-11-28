@@ -16,7 +16,7 @@ CREATE TABLE sub_departments (
     id SERIAL PRIMARY KEY NOT NULL,
     name VARCHAR(255) NOT NULL,
     url_name VARCHAR(255) NOT NULL,
-    department_id INTEGER REFERENCES departments(id)
+    department_id INTEGER REFERENCES departments(id) NOT NULL
 );
 
 CREATE TABLE products (
