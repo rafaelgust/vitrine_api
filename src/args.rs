@@ -3,6 +3,7 @@ use clap::{
     Parser, 
     Subcommand
 };
+use serde::{Deserialize, Serialize};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]
@@ -53,7 +54,7 @@ pub enum DepartmentSubcommand {
     Show(GetEntity),
 
     /// Create a new department
-    Create(CreateWithNameEntity),
+    Create(CreateDepartment),
 
     /// Update an existing department
     Update(UpdateDepartment),
@@ -65,25 +66,25 @@ pub enum DepartmentSubcommand {
     ShowAll,
 }
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Deserialize, Serialize)]
 pub struct GetEntity {
     /// The name of the entity to find
     pub name: String,
 }
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Deserialize, Serialize)]
 pub struct DeleteEntity {
     /// The id of the entity to delete
     pub id: i32,
 }
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Deserialize, Serialize)]
 pub struct CreateWithNameEntity {
     /// The name of the entity
     pub name: String,
 }
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Deserialize, Serialize)]
 pub struct UpdateBrand {
     /// The id of the brand to update
     pub id: i32,
@@ -92,11 +93,23 @@ pub struct UpdateBrand {
     pub name: String,
 }
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Deserialize, Serialize)]
+pub struct CreateDepartment {
+    /// The name of the entity
+    pub name: String,
+
+    /// The color of the entity
+    pub color: String,
+}
+
+#[derive(Debug, Args, Deserialize, Serialize)]
 pub struct UpdateDepartment {
     /// The id of the department to update
     pub id: i32,
 
     /// The name of the department
     pub name: String,
+
+    /// The color of the department
+    pub color: String,
 }

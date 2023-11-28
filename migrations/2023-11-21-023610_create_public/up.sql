@@ -9,7 +9,7 @@ CREATE TABLE departments (
     id SERIAL PRIMARY KEY NOT NULL,
     name VARCHAR(255) NOT NULL,
     url_name VARCHAR(255) NOT NULL,
-    color VARCHAR(20)
+    color VARCHAR(7) NOT NULL
 );
 
 CREATE TABLE sub_departments (

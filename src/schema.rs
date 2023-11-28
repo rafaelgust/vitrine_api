@@ -17,8 +17,8 @@ diesel::table! {
         name -> Varchar,
         #[max_length = 255]
         url_name -> Varchar,
-        #[max_length = 20]
-        color -> Nullable<Varchar>,
+        #[max_length = 7]
+        color -> Varchar,
     }
 }
 

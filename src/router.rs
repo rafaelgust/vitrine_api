@@ -2,12 +2,12 @@ use rocket::http::uri::Origin;
 use rocket::response::{Redirect, status::Accepted, status::NotFound};
 use rocket::serde::json::Json;
 
-use crate::models::*;
+use crate::models::{Brand, Department, Product};
 use crate::ops::brand_ops::{self, BrandResult};
 use crate::ops::department_ops::{self, DepartmentResult};
 
 use crate::args::{BrandCommand, BrandSubcommand, DepartmentCommand, DepartmentSubcommand};
-use crate::args::{GetEntity, CreateWithNameEntity, DeleteEntity, UpdateBrand as UpdateBrandArgs, UpdateDepartment as UpdateDepartmentArgs};
+use crate::args::{GetEntity, CreateWithNameEntity, DeleteEntity, UpdateBrand as UpdateBrandArgs, CreateDepartment, UpdateDepartment as UpdateDepartmentArgs};
 
 const BRAND_NOT_FOUND: &str = "Unable to find brand";
 const DEPARTMENT_NOT_FOUND: &str = "Unable to find department";
@@ -22,7 +22,7 @@ pub fn get_index() -> Redirect {
 pub const URI_BRAND : Origin<'static> = uri!("/brand");
 
 #[post("/", data = "<new_brand>", format = "application/json")]
-pub fn new_brand(new_brand: Json<NewBrand<'_>>) -> Result<Accepted<String>, NotFound<String>> {
+pub fn new_brand(new_brand: Json<CreateWithNameEntity>) -> Result<Accepted<String>, NotFound<String>> {
 
     let brand = CreateWithNameEntity {
         name: new_brand.name.trim().to_string(),
@@ -40,7 +40,7 @@ pub fn new_brand(new_brand: Json<NewBrand<'_>>) -> Result<Accepted<String>, NotF
 }
 
 #[put("/", data = "<brand>", format = "application/json")]
-pub fn update_brand(brand: Json<UpdateBrand>) -> Result<Accepted<Json<Brand>>, NotFound<String>> {
+pub fn update_brand(brand: Json<UpdateBrandArgs>) -> Result<Accepted<Json<Brand>>, NotFound<String>> {
     
     let brand = UpdateBrandArgs {
         id: brand.id,
@@ -89,7 +89,7 @@ pub fn get_brand(brand_name: String) ->  Result<Json<Brand>, NotFound<String>> {
 }
 
 #[delete("/", data = "<brand>", format = "application/json")]
-pub fn delete_brand(brand: Json<RemoveBrand>) ->  Result<Accepted<String>, NotFound<String>> {
+pub fn delete_brand(brand: Json<DeleteEntity>) ->  Result<Accepted<String>, NotFound<String>> {
 
     let result = brand_ops::handle_brand_command(BrandCommand {
         command: BrandSubcommand::Delete(DeleteEntity {
@@ -107,10 +107,11 @@ pub fn delete_brand(brand: Json<RemoveBrand>) ->  Result<Accepted<String>, NotFo
 pub const URI_DEPARTMENT : Origin<'static> = uri!("/department");
 
 #[post("/", data = "<new_department>", format = "application/json")]
-pub fn new_department(new_department: Json<NewDepartment<'_>>) -> Result<Accepted<String>, NotFound<String>> {
+pub fn new_department(new_department: Json<CreateDepartment>) -> Result<Accepted<String>, NotFound<String>> {
 
-    let department = CreateWithNameEntity {
+    let department = CreateDepartment {
         name: new_department.name.trim().to_string(),
+        color: "#FFFFFF".to_string(),
     };
     
     let result = department_ops::handle_department_command(DepartmentCommand {
@@ -125,11 +126,12 @@ pub fn new_department(new_department: Json<NewDepartment<'_>>) -> Result<Accepte
 }
 
 #[put("/", data = "<department>", format = "application/json")]
-pub fn update_department(department: Json<UpdateDepartment>) -> Result<Accepted<Json<Department>>, NotFound<String>> {
-    
+pub fn update_department(department: Json<UpdateDepartmentArgs>) -> Result<Accepted<Json<Department>>, NotFound<String>> {
+   
     let department = UpdateDepartmentArgs {
         id: department.id,
         name: department.name.to_string(),
+        color: department.color.to_string(),
     };
     
     let result = department_ops::handle_department_command(DepartmentCommand {
@@ -174,7 +176,7 @@ pub fn get_department(department_name: String) ->  Result<Json<Department>, NotF
 }
 
 #[delete("/", data = "<department>", format = "application/json")]
-pub fn delete_department(department: Json<RemoveDepartment>) ->  Result<Accepted<String>, NotFound<String>> {
+pub fn delete_department(department: Json<DeleteEntity>) ->  Result<Accepted<String>, NotFound<String>> {
 
     let result = department_ops::handle_department_command(DepartmentCommand {
         command: DepartmentSubcommand::Delete(DeleteEntity {

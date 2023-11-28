@@ -2,7 +2,7 @@ use crate::args::{
     DepartmentSubcommand, 
     DepartmentCommand, 
     GetEntity, 
-    CreateWithNameEntity, 
+    CreateDepartment, 
     UpdateDepartment, 
     DeleteEntity
 };
@@ -53,11 +53,12 @@ fn show_department_by_name(department: GetEntity, connection: &mut PgConnection)
     department_result
 }
 
-fn create_department(department: CreateWithNameEntity, connection: &mut PgConnection) -> Result<String, Error> {
+fn create_department(department: CreateDepartment, connection: &mut PgConnection) -> Result<String, Error> {
     info!("Creating department: {:?}", department);
 
     let new_department = NewDepartment {
-        name: &department.name
+        name: &department.name,
+        color: &department.color,
     };
 
     let result = diesel::insert_into(departments)
