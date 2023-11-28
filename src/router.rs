@@ -255,7 +255,7 @@ pub fn delete_sub_department(sub_department: Json<DeleteEntity>) ->  Result<Acce
     }
 }
 
-#[get("/", format = "application/json")]
+#[get("/subdepartment", format = "application/json")]
 pub fn get_all_sub_departments() -> Result<Json<Vec<SubDepartment>>, NotFound<String>> {
     
     let result = sub_department_ops::handle_sub_department_command(SubDepartmentCommand {
