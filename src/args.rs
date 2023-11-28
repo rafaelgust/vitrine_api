@@ -19,6 +19,9 @@ pub enum EntityType {
 
     /// Create, update, delete or show departments
     Department(DepartmentCommand),
+
+    /// Create, update, delete or show sub departments
+    SubDepartment(SubDepartmentCommand),
 }
 
 #[derive(Debug, Args)]
@@ -29,6 +32,7 @@ pub struct EntityCommand<T: Subcommand> {
 
 pub type BrandCommand = EntityCommand<BrandSubcommand>;
 pub type DepartmentCommand = EntityCommand<DepartmentSubcommand>;
+pub type SubDepartmentCommand = EntityCommand<SubDepartmentSubcommand>;
 
 #[derive(Debug, Subcommand)]
 pub enum BrandSubcommand {
@@ -66,6 +70,24 @@ pub enum DepartmentSubcommand {
     ShowAll,
 }
 
+#[derive(Debug, Subcommand)]
+pub enum SubDepartmentSubcommand {
+    /// Show department by name
+    Show(GetEntity),
+
+    /// Create a new sub department
+    Create(CreateSubDepartment),
+
+    /// Update an existing sub department
+    Update(UpdateSubDepartment),
+
+    /// Delete a sub department
+    Delete(DeleteEntity),
+
+    /// Show all sub departments
+    ShowAll,
+}
+
 #[derive(Debug, Args, Deserialize, Serialize)]
 pub struct GetEntity {
     /// The name of the entity to find
@@ -95,10 +117,10 @@ pub struct UpdateBrand {
 
 #[derive(Debug, Args, Deserialize, Serialize)]
 pub struct CreateDepartment {
-    /// The name of the entity
+    /// The name of the department
     pub name: String,
 
-    /// The color of the entity
+    /// The color of the department
     pub color: String,
 }
 
@@ -112,4 +134,25 @@ pub struct UpdateDepartment {
 
     /// The color of the department
     pub color: String,
+}
+
+#[derive(Debug, Args, Deserialize, Serialize)]
+pub struct CreateSubDepartment {
+    /// The name of the sub department
+    pub name: String,
+
+    /// The color of the sub department
+    pub department_id: i32,
+}
+
+#[derive(Debug, Args, Deserialize, Serialize)]
+pub struct UpdateSubDepartment {
+    /// The id of the department to update
+    pub id: i32,
+
+    /// The name of the sub department
+    pub name: String,
+
+    /// The color of the sub department
+    pub department_id: i32,
 }
