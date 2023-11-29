@@ -19,9 +19,10 @@ Siga os passos abaixo para executar o projeto localmente:
 1. Clone o repositório.
 2. Certifique-se de ter Rust, Rocket e Diesel instalados.
 3. Navegue até o diretório do projeto.
-4. Execute `diesel setup` para configurar o banco de dados.
-5. Execute `diesel migration run` para aplicar as migrações do banco de dados.
-6. Execute `cargo run` para iniciar o servidor.
+4. Crie um arquivo chamado `.env` na raiz do projeto e adicione a seguinte linha, substituindo as informações apropriadas: DATABASE_URL=postgresql://postgres:sua_senha@localhost:5432/seu_banco_de_dados
+5. Execute `diesel setup` para configurar o banco de dados.
+6. Execute `diesel migration run` para aplicar as migrações do banco de dados.
+7. Execute `cargo run` para iniciar o servidor.
 
 ## Rotas da API
 
