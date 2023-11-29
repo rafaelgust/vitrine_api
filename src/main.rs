@@ -1,28 +1,34 @@
-use warp::Filter;
+#[macro_use]
+extern crate rocket;
+extern crate diesel;
 
-mod routes;
+mod db;
+mod router;
+mod models;
+mod schema;
 
-#[tokio::main]
-async fn main() {
-    
-    //let routes = routes::products_route().or(routes::routes()); // This is the original code
+mod ops;
+mod args;
 
-    let products = warp::path!("api" / "products")
-    .and(warp::get())
-    .map(|| "Products endpoint");
+use rocket::Rocket;
+use rocket::Build;
 
-    let department = warp::path!("api" / "department" / i32 / "subdepartment" / i32)
-    .map(|department_id: i32, subdepartment_id: i32| {
-        format!("Department ID: {},
-         Subdepartment ID: {}", department_id, subdepartment_id)
-    });
-
-    let sub_departments = warp::path!("api" / "departments" / "sub-departments").and(warp::get()).map(|| "SubDepartments endpoint");
-
-    let routes = products.or(department).or(sub_departments);
-
-    warp::serve(routes)
-        .run(([127, 0, 0, 1], 3030))
-        .await;
+fn rocket() -> Rocket<Build> {
+    rocket::build()
+    .mount("/", routes![router::get_index])
+    .mount(router::URI_PRODUCT, routes![
+        router::get_products, router::get_product
+        ])
+    .mount(router::URI_DEPARTMENT, routes![
+        router::new_department, router::update_department, router::delete_department, router::get_department, router::get_all_departments,
+        router::new_sub_department, router::update_sub_department, router::delete_sub_department, router::get_sub_department, router::get_all_sub_departments
+        ])
+    .mount(router::URI_BRAND, routes![
+        router::get_brand, router::update_brand, router::get_all_brands, router::new_brand, router::delete_brand
+        ])
 }
 
+#[rocket::main]
+async fn main() {
+    rocket().launch().await.expect("Failed to launch Rocket");
+}
